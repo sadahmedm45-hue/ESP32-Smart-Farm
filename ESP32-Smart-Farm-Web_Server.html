@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المزرعة الذكية</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        
+        :root { 
+            --bg-color: #0b132b;
+            --card-bg: #1c2541;
+            --primary: #4cc9f0;
+            --success: #06d6a0;
+            --warning: #ffd166;
+            --danger: #ef476f;
+            --accent-pink: #ff007f;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--bg-color);
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: direction 0.3s ease;
+        }
+        
+        .container { width: 100%; max-width: 1100px; position: relative; }
+        
+        /* شاشة اسم المهندس الصغيرة المزخرفة والمضيئة في أعلى الواجهة */
+        .dev-badge-screen {
+            background: linear-gradient(135deg, rgba(28, 37, 65, 0.9), rgba(11, 19, 43, 0.9));
+            border: 1px solid rgba(76, 201, 240, 0.3);
+            border-top: 3px solid var(--accent-pink);
+            border-bottom: 3px solid var(--primary);
+            box-shadow: 0 0 20px rgba(76, 201, 240, 0.15), inset 0 0 10px rgba(255, 0, 127, 0.1);
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        
+        header h1 { margin: 0; font-size: 2.2rem; font-weight: 900; color: #fff; }
+        header p { margin: 5px 0 0 0; color: var(--primary); font-weight: 600; }
+
+        /* زر اختيار اللغة المميز والأنيق */
+        .lang-switcher {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #6a1b9a, #8e24aa);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(142, 36, 170, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        html[dir="ltr"] .lang-switcher { left: auto; right: 10px; }
+        .lang-switcher:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(142, 36, 170, 0.6); }
+
+        /* تقسيم كروت لوحة التحكم */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card h2 { 
+            margin-top: 0; 
+            font-size: 1.3rem; 
+            font-weight: 700;
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .control-row:last-child { border: none; }
+        .control-row span { font-weight: 600; font-size: 1rem; }
+
+        .btn {
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+        .btn-active { background-color: var(--success); color: #000; }
+        .btn-inactive { background-color: #475569; color: #cbd5e1; }
+        .btn-mode-manual { background-color: var(--primary); color: #000; }
+        .btn-mode-auto { background-color: var(--accent-pink); color: #fff; }
+
+        /* شاشة البيانات الحية */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+        .stat-label { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; margin-top: 5px; }
+
+        /* شاشة الحالات الذكية المستجيبة للإتجاهات */
+        .terminal-screen {
+            background-color: #050914;
+            border-radius: 12px;
+            padding: 15px;
+            flex-grow: 1;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .status-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-inline-start: 5px solid transparent;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .item-danger { background: rgba(239, 71, 111, 0.1); border-inline-start-color: var(--danger); color: #ffa6bc; }
+        .item-success { background: rgba(6, 214, 160, 0.1); border-inline-start-color: var(--success); color: #9bf6df; }
+        .item-warning { background: rgba(255, 209, 102, 0.1); border-inline-start-color: var(--warning); color: #ffeaa7; }
+        .item-info { background: rgba(76, 201, 240, 0.1); border-inline-start-color: var(--primary); color: #bdefff; }
+
+        .badge { padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; }
+        .badge-on { background: rgba(6, 214, 160, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .badge-off { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); border: 1px solid #475569; }
+
+        /* شريط السلايدرات للمحاكاة */
+        .sliders-card { width: 100%; box-sizing: border-box; }
+        .sliders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .slider-group { display: flex; flex-direction: column; gap: 8px; }
+        .slider-group label { display: flex; justify-content: space-between; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+        .slider-group label span:last-child { color: var(--primary); font-weight: 700; }
+        .range-slider { width: 100%; -webkit-appearance: none; background: #2d3748; height: 8px; border-radius: 4px; outline: none; }
+        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary); cursor: pointer; box-shadow: 0 0 8px var(--primary); }
+    </style>
+</head>
+<body>
+    <button id="langBtn" class="lang-switcher" onclick="toggleLang()">English</button>
+
+    <div class="container">
+        <div id="devScreen" class="dev-badge-screen">
+            ⚙️ برمجة واعداد : م/ سعد أحمد معيض علبوهان
+        </div>
+
+        <header>
+            <h1 id="headerTitle">🌿 لوحة الإدارة الهجينة للمزرعة الذكية</h1>
+            <p id="headerSub">نظام المراقبة والأتمتة والتحكم بالصلاحيات المباشر</p>
+        </header>
+        
+        <div class="main-grid">
+            <div class="card">
+                <h2 id="card1Title">⚙️ صلاحيات النظام والشبكات</h2>
+                <div class="control-row">
+                    <span id="lblMode">وضع التحكم بالمزرعة:</span>
+                    <button id="modeBtn" class="btn btn-mode-manual" onclick="toggleMode()">يدوي</button>
+                </div>
+                <div class="control-row">
+                    <span id="lblWifi">خادم الويب (Wi-Fi Web Server):</span>
+                    <button id="wifiBtn" class="btn btn-active" onclick="togglePerm('wifi')">نشط</button>
+                </div>
+                <div class="control-row">
+                    <span id="lblBt">اتصال البلوتوث (Bluetooth):</span>
+                    <button id="btBtn" class="btn btn-active" onclick="togglePerm('bt')">نشط</button>
+                </div>
+                <div class="control-row">
+                    <span id="lblMqtt">بث السحابة (MQTT Client):</span>
+                    <button id="mqttBtn" class="btn btn-active" onclick="togglePerm('mqtt')">نشط</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 id="card2Title">📊 شاشة قراءات المستشعرات</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label" id="lblTemp">درجة الحرارة</div>
+                        <div class="stat-value" id="dispTemp" style="color: #ff6b6b;">-- °C</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label" id="lblHum">الرطوبة الجوية</div>
+                        <div class="stat-value" id="dispHum" style="color: var(--primary);">-- %</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label" id="lblSoil">رطوبة التربة</div>
+                        <div class="stat-value" id="dispSoil" style="color: var(--success);">-- %</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label" id="lblRain">مستوى المطر</div>
+                        <div class="stat-value" id="dispRain" style="color: #a18cd1;">-- %</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 id="card3Title">🤖 شاشة الحالات والقرارات الذكية</h2>
+                <div class="terminal-screen" id="aiScreen">
+                    <div class="status-item item-info">جاري استقبال البيانات وتحليلها...</div>
+                </div>
+                
+                <h2 id="card3Sub" style="margin-top: 15px; margin-bottom: 10px; font-size: 1.1rem; padding-bottom: 5px;">🔌 المخرجات الحالية</h2>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div id="lblOutPump">المضخة: <span id="lblPump" class="badge badge-off">مطفأة</span></div>
+                    <div id="lblOutHeater">التدفئة: <span id="lblHeater" class="badge badge-off">مطفأة</span></div>
+                    <div id="lblOutServo">السقف: <span id="lblServo" class="badge badge-off">مفتوح</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card sliders-card">
+            <h2 id="card4Title">🎛️ محاكاة المتغيرات البيئية (نشط في الوضع اليدوي فقط)</h2>
+            <div class="sliders-grid">
+                <div class="slider-group">
+                    <label><span id="lblSimTemp">درجة الحرارة:</span><span><span id="tVal">24</span>°C</span></label>
+                    <input type="range" id="tSlider" class="range-slider" min="-5" max="50" value="24" oninput="updateSensor('temp', this.value)">
+                </div>
+                <div class="slider-group">
+                    <label><span id="lblSimHum">الرطوبة الجوية:</span><span><span id="hVal">50</span>%</span></label>
+                    <input type="range" id="hSlider" class="range-slider" min="10" max="100" value="50" oninput="updateSensor('humid', this.value)">
+                </div>
+                <div class="slider-group">
+                    <label><span id="lblSimSoil">رطوبة التربة:</span><span><span id="sVal">60</span>%</span></label>
+                    <input type="range" id="sSlider" class="range-slider" min="0" max="100" value="60" oninput="updateSensor('soil', this.value)">
+                </div>
+                <div class="slider-group">
+                    <label><span id="lblSimRain">شدة هطول المطر:</span><span><span id="rVal">0</span>%</span></label>
+                    <input type="range" id="rSlider" class="range-slider" min="0" max="100" value="0" oninput="updateSensor('rain', this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'ar';
+
+        // دالة تحديث كافة النصوص في الواجهة عند تبديل اللغة (تشمل اسم المطور الآن)
+        function updateStaticTexts() {
+            const isAr = currentLang === 'ar';
+            
+            // تحديث شاشة المطور العلوية بناء على طلبك بدقة
+            document.getElementById('devScreen').innerText = isAr ? "⚙️ برمجة واعداد : م/ سعد أحمد معيض علبوهان" : "⚙️ Programming and Preparation :Eng./Saad Ahmed Moith Al-bohan";
+            
+            document.getElementById('headerTitle').innerText = isAr ? "🌿 لوحة الإدارة الهجينة للمزرعة الذكية" : "🌿 Hybrid Smart Farm Dashboard";
+            document.getElementById('headerSub').innerText = isAr ? "نظام المراقبة والأتمتة والتحكم بالصلاحيات المباشر" : "Live Monitoring, Automation & Permissions System";
+            document.getElementById('card1Title').innerHTML = isAr ? "⚙️ صلاحيات النظام والشبكات" : "⚙️ System & Network Permissions";
+            document.getElementById('lblMode').innerText = isAr ? "وضع التحكم بالمزرعة:" : "Farm Control Mode:";
+            document.getElementById('lblWifi').innerText = isAr ? "خادم الويب (Wi-Fi Web Server):" : "Wi-Fi Web Server:";
+            document.getElementById('lblBt').innerText = isAr ? "اتصال البلوتوث (Bluetooth):" : "Bluetooth Connectivity:";
+            document.getElementById('lblMqtt').innerText = isAr ? "بث السحابة (MQTT Client):" : "Cloud Stream (MQTT Client):";
+            document.getElementById('card2Title').innerHTML = isAr ? "📊 شاشة قراءات المستشعرات" : "📊 Sensor Readings Screen";
+            document.getElementById('lblTemp').innerText = isAr ? "درجة الحرارة" : "Temperature";
+            document.getElementById('lblHum').innerText = isAr ? "الرطوبة الجوية" : "Humidity";
+            document.getElementById('lblSoil').innerText = isAr ? "رطوبة التربة" : "Soil Moisture";
+            document.getElementById('lblRain').innerText = isAr ? "مستوى المطر" : "Rain Level";
+            document.getElementById('card3Title').innerHTML = isAr ? "🤖 شاشة الحالات والقرارات الذكية" : "🤖 Smart Decisions & Status Screen";
+            document.getElementById('card3Sub').innerText = isAr ? "🔌 المخرجات الحالية" : "🔌 Current Actuators State";
+            
+            document.getElementById('lblOutPump').childNodes[0].textContent = isAr ? "المضخة: " : "Pump: ";
+            document.getElementById('lblOutHeater').childNodes[0].textContent = isAr ? "التدفئة: " : "Heater: ";
+            document.getElementById('lblOutServo').childNodes[0].textContent = isAr ? "السقف: " : "Roof: ";
+            
+            document.getElementById('card4Title').innerHTML = isAr ? "🎛️ محاكاة المتغيرات البيئية (نشط في الوضع اليدوي فقط)" : "🎛️ Environmental Simulation (Active in Manual Mode only)";
+            document.getElementById('lblSimTemp').innerText = isAr ? "درجة الحرارة:" : "Temperature:";
+            document.getElementById('lblSimHum').innerText = isAr ? "الرطوبة الجوية:" : "Humidity:";
+            document.getElementById('lblSimSoil').innerText = isAr ? "رطوبة التربة:" : "Soil Moisture:";
+            document.getElementById('lblSimRain').innerText = isAr ? "شدة هطول المطر:" : "Rain Intensity:";
+        }
+
+        function toggleLang() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            document.documentElement.dir = (currentLang === 'ar') ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            document.getElementById('langBtn').innerText = (currentLang === 'ar') ? 'English' : 'العربية';
+            updateStaticTexts();
+            requestData(); 
+        }
+
+        function requestData() {
+            fetch('/readings')
+            .then(response => response.json())
+            .then(data => {
+                const isAr = currentLang === 'ar';
+
+                document.getElementById('dispTemp').innerText = data.temp + " °C";
+                document.getElementById('dispHum').innerText  = data.humid + " %";
+                document.getElementById('dispSoil').innerText = data.soil + " %";
+                document.getElementById('dispRain').innerText = data.rain + " %";
+
+                syncButton('modeBtn', data.mode, isAr?'يدوي':'Manual', isAr?'تلقائي':'Auto', 'btn-mode-manual', 'btn-mode-auto');
+                syncButton('wifiBtn', data.wifi, isAr?'نشط':'Active', isAr?'محظور':'Blocked', 'btn-active', 'btn-inactive');
+                syncButton('btBtn', data.bt, isAr?'نشط':'Active', isAr?'محظور':'Blocked', 'btn-active', 'btn-inactive');
+                syncButton('mqttBtn', data.mqtt, isAr?'نشط':'Active', isAr?'محظور':'Blocked', 'btn-active', 'btn-inactive');
+
+                updateBadge('lblPump', data.pump, isAr?'تعمل الآن':'Running Now', isAr?'مطفأة':'OFF');
+                updateBadge('lblHeater', data.heater, isAr?'تدفئة نشطة':'Heater Active', isAr?'مطفأة':'OFF');
+                
+                let servoTxt = "";
+                if(isAr) {
+                    servoTxt = data.servo > 90 ? "مغلق ("+data.servo+"°)" : "مفتوح ("+data.servo+"°)";
+                } else {
+                    servoTxt = data.servo > 90 ? "Closed ("+data.servo+"°)" : "Open ("+data.servo+"°)";
+                }
+                document.getElementById('lblServo').innerText = servoTxt;
+                document.getElementById('lblServo').className = data.servo > 90 ? "badge badge-on" : "badge badge-off";
+
+                let htmlLog = "";
+
+                // حالات الحرارة والصقيع
+                if (data.temp < 3) {
+                    htmlLog += `<div class="status-item item-danger">${isAr ? '🚨 تحذير صقيع! تم تشغيل المكيفات للتدفئة فوراُ!' : '🚨 Frost Warning! Heaters turned ON immediately!'}</div>`;
+                } else if (data.temp > 5) {
+                    htmlLog += `<div class="status-item item-success">${isAr ? '✅ زال الخطر. تم إطفاء المكيفات (الحرارة مستقرة).' : '✅ Danger Cleared. Heaters turned OFF (Stable Temp).'}</div>`;
+                } else {
+                    htmlLog += `<div class="status-item item-info">${isAr ? '❄️ درجة الحرارة منخفضة ونراقب الوضع بحذر.' : '❄️ Low temperature, monitoring the situation carefully.'}</div>`;
+                }
+
+                // حالات رطوبة التربة والري
+                if (data.soil < 50) {
+                    htmlLog += `<div class="status-item item-warning">${isAr ? '⚠️ تحذير جفاف! رطوبة التربة منخفضة، تم بدء تشغيل المضخات.' : '⚠️ Drought Warning! Soil moisture low, pumps started.'}</div>`;
+                } else {
+                    htmlLog += `<div class="status-item item-success">${isAr ? '🌱 متحسن. عملية انتهاء الري مستقرة والمضخات مطفأة.' : '🌱 Improved. Irrigation completed successfully, pumps are OFF.'}</div>`;
+                }
+
+                // حالات مستويات المطر
+                if (data.rain == 0) {
+                    htmlLog += `<div class="status-item item-info">${isAr ? '☀️ حالة الطقس: المطر واقف تماماً.' : '☀️ Weather State: Rain stopped completely.'}</div>`;
+                } else if (data.rain > 0 && data.rain <= 25) {
+                    htmlLog += `<div class="status-item item-info">${isAr ? '🌦️ حالة الطقس: رشة مطر خفيفة ومستقرة.' : '🌦️ Weather State: Light stable drizzle.'}</div>`;
+                } else if (data.rain > 25 && data.rain <= 65) {
+                    htmlLog += `<div class="status-item item-warning">${isAr ? '🌧️ حالة الطقس: هطول مطر متوسط.' : '🌧️ Weather State: Moderate rain falling.'}</div>`;
+                } else {
+                    htmlLog += `<div class="status-item item-danger">${isAr ? '⛈️ حالة الطقس: هطول مطر غزير جداً! عاصفة قائمة.' : '⛈️ Weather State: Very heavy rain! Ongoing storm.'}</div>`;
+                }
+
+                document.getElementById('aiScreen').innerHTML = htmlLog;
+
+            }).catch(err => console.log("Error Syncing Data..."));
+        }
+        
+        setInterval(requestData, 1000);
+
+        function syncButton(id, state, activeTxt, inactiveTxt, activeClass, inactiveClass) {
+            let btn = document.getElementById(id);
+            btn.innerText = state ? activeTxt : inactiveTxt;
+            btn.className = "btn " + (state ? activeClass : inactiveClass);
+        }
+
+        function updateBadge(id, state, onTxt, offTxt) {
+            let b = document.getElementById(id);
+            b.innerText = state ? onTxt : offTxt;
+            b.className = state ? "badge badge-on" : "badge badge-off";
+        }
+
+        function updateSensor(type, val) {
+            document.getElementById(type[0] + 'Val').innerText = val;
+            fetch(`/update?type=${type}&value=${val}`);
+        }
+
+        function toggleMode() { fetch('/toggleMode'); }
+        function togglePerm(proto) { fetch(`/togglePerm?proto=${proto}`); }
+    </script>
+</body>
+</html>
