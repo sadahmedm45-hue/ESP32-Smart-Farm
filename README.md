@@ -3,7 +3,7 @@
 An integrated Internet of Things (IoT) system designed to automate and manage smart farms and greenhouses using the **ESP32** microcontroller. The project integrates three parallel and independent communication protocols to provide maximum flexibility, local control, and cloud monitoring.
 
 ### ⚙️ Developed By
-* **Engineer:** Saad Ahmed Moith Al-bohan
+* **Engineer:** Saad Ahmed Mouith Al-bohan
 
 ---
 
